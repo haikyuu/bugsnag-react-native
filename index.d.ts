@@ -1,133 +1,92 @@
-declare module "bugsnag-react-native" {
-    export class Client {
-        config: Configuration
+export class Client {
+  public config: Configuration;
 
-        constructor(apiKeyOrConfig: string | Configuration)
+  constructor(apiKeyOrConfig: string | Configuration);
 
-        /**
-         * Sends an error report to Bugsnag
-         * @param error               The error instance to report
-         * @param beforeSendCallback  A callback invoked before the report is sent
-         *                            so additional information can be added
-         * @param blocking            When true, blocks the native thread execution
-         *                            until complete. If unspecified, sends the
-         *                            request asynchronously
-         * @param postSendCallback    Callback invoked after request is queued
-         */
-        notify(
-            error: Error,
-            beforeSendCallback: (report: Report) => void,
-            blocking?: boolean,
-            postSendCallback?: (sent: boolean) => void
-        ): void
+  public notify(
+    error: Error,
+    beforeSendCallback?: BeforeSend,
+    blocking?: boolean,
+    postSendCallback?: (sent: boolean) => void,
+  ): void;
 
-        setUser(id: string, name: string, email: string): void
+  public setUser(id: string, name: string, email: string): void;
 
-        /**
-         * Clear custom user data and reset to the default device identifier
-         */
-        clearUser(): void
+  public clearUser(): void;
 
-        /**
-         * Leaves a 'breadcrumb' log message. The most recent breadcrumbs
-         * are attached to subsequent error reports.
-         */
-        leaveBreadcrumb(name: string, metadata?: Metadata | string): void
-    }
-    /**
-     * Configuration options for a Bugsnag client
-     */
-    export class Configuration {
-        version: string
-        apiKey?: string
-        delivery: StandardDelivery
-        beforeSendCallbacks: ((report: Report) => boolean)[]
-        notifyReleaseStages?: string[]
-        releaseStage?: string
-        appVersion?: string
-        codeBundleId?: string
-        autoNotify: boolean
-        handlePromiseRejections: boolean
+  public leaveBreadcrumb(name: string, metadata?: IMetadata | string): void;
+}
 
-        constructor(apiKey?: string)
+export class Configuration {
+  public version: string;
+  public apiKey?: string;
+  public delivery: IStandardDelivery;
+  public beforeSendCallbacks: BeforeSend[];
+  public notifyReleaseStages?: string[];
+  public releaseStage?: string;
+  public appVersion?: string;
+  public codeBundleId?: string;
+  public autoNotify: boolean;
+  public handlePromiseRejections: boolean;
 
-        /**
-         * Whether reports should be sent to Bugsnag, based on the release stage
-         * configuration
-         */
-        shouldNotify(): boolean
+  constructor(apiKey?: string);
 
-        /**
-         * Adds a function which is invoked after an error is reported but before
-         * it is sent to Bugsnag. The function takes a single parameter which is
-         * an instance of Report.
-         */
-        registerBeforeSendCallback(callback: (report: Report) => boolean): void
+  public shouldNotify(): boolean;
 
-        /**
-         * Remove a callback from the before-send pipeline
-         */
-        unregisterBeforeSendCallback(
-            callback: (report: Report) => boolean
-        ): void
+  public registerBeforeSendCallback(callback: BeforeSend): void;
 
-        /**
-         * Remove all callbacks invoked before reports are sent to Bugsnag
-         */
-        clearBeforeSendCallbacks(): void
+  public unregisterBeforeSendCallback(
+    callback: BeforeSend,
+  ): void;
 
-        toJSON(): any
-    }
+  public clearBeforeSendCallbacks(): void;
 
-    export class StandardDelivery {
-        endpoint: string
+  public toJSON(): any;
+}
 
-        constructor(endpoint: string)
-    }
+type BeforeSend = (report: Report) => boolean | void;
 
-    export interface Metadata {
-        type?:
-            | "error"
-            | "log"
-            | "navigation"
-            | "process"
-            | "request"
-            | "state"
-            | "user"
-            | "manual"
-        [key: string]: MetadataValue | string | number | boolean
-    }
+export class IStandardDelivery {
+  public endpoint: string;
 
-    export interface MetadataValue {
-        [key: string]: string | number | boolean
-    }
+  constructor(endpoint: string);
+}
 
-    /**
-     * A report generated from an error
-     */
-    export class Report {
-        apiKey: string
-        errorClass: string
-        errorMessage: string
-        context?: string
-        groupingHash?: string
-        metadata: Metadata
-        severity: "warning" | "error" | "info"
-        stacktrace: string
-        user: any
+export interface IMetadata {
+  type?:
+    | "error"
+    | "log"
+    | "navigation"
+    | "process"
+    | "request"
+    | "state"
+    | "user"
+    | "manual";
+  [key: string]: IMetadataValue | string | number | boolean | undefined;
+}
 
-        constructor(apiKey: string, error: Error)
+export interface IMetadataValue {
+  [key: string]: string | number | boolean | undefined;
+}
 
-        /**
-         * Attach additional diagnostic data to the report. The key/value pairs
-         * are grouped into sections.
-         */
-        addMetadata(
-            section: string,
-            key: string,
-            value: number | string | boolean
-        ): void
+export class Report {
+  public apiKey: string;
+  public errorClass: string;
+  public errorMessage: string;
+  public context?: string;
+  public groupingHash?: string;
+  public metadata: IMetadata;
+  public severity: "warning" | "error" | "info";
+  public stacktrace: string;
+  public user: any;
 
-        toJSON(): any
-    }
+  constructor(apiKey: string, error: Error);
+
+  public addIMetadata(
+    section: string,
+    key: string,
+    value: number | string | boolean,
+  ): void;
+
+  public toJSON(): any;
 }
